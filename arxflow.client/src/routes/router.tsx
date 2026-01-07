@@ -1,16 +1,14 @@
 import { createBrowserRouter } from 'react-router-dom';
 import MainLayout from '../components/Layout/MainLayout';
+import HomePage from '../pages/Home/HomePage';
 import EmissoresPage from '../pages/Emissores/EmissoresPage';
 import FundosPage from '../pages/Fundos/FundosPage';
 import ContrapartesPage from '../pages/Contrapartes/ContrapartesPage';
 import AtivosPage from '../pages/Ativos/AtivosPage';
-
-// Placeholder pages - serão criadas nas próximas fases
-const HomePage = () => <div>Home - Em desenvolvimento</div>;
-const BoletasPage = () => <div>Boletas - Em desenvolvimento</div>;
-const CalculadoraTitulosPage = () => <div>Calculadora de Títulos - Em desenvolvimento</div>;
-const YieldCurvePage = () => <div>Curva de Juros - Em desenvolvimento</div>;
-const DownloadsPage = () => <div>Downloads - Em desenvolvimento</div>;
+import BoletasPage from '../pages/Boletas/BoletasPage';
+import CalculadoraTitulosPage from '../pages/CalculadoraTitulos/CalculadoraTitulosPage';
+import YieldCurvePage from '../pages/YieldCurve/YieldCurvePage';
+import DownloadsPage from '../pages/Downloads/DownloadsPage';
 
 export const router = createBrowserRouter([
   {

@@ -1,20 +1,19 @@
 import { useState } from 'react';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
 import {
-  Box,
-  Button,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  TextField,
-  Paper,
-  Typography,
-} from '@mui/material';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import type { GridColDef } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/data-table';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useGetContrapartes,
@@ -26,6 +25,11 @@ import type { CreateContraparteRequest, UpdateContraparteRequest } from '../../a
 
 interface ContraparteFormData {
   nome: string;
+}
+
+interface Contraparte {
+  id: number;
+  nome?: string;
 }
 
 export default function ContrapartesPage() {
@@ -41,7 +45,7 @@ export default function ContrapartesPage() {
   const updateMutation = useUpdateContraparte();
   const deleteMutation = useDeleteContraparte();
 
-  const handleOpenDialog = (contraparte?: any) => {
+  const handleOpenDialog = (contraparte?: Contraparte) => {
     if (contraparte) {
       setEditingId(contraparte.id);
       setFormData({
@@ -91,79 +95,75 @@ export default function ContrapartesPage() {
     }
   };
 
-  const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 80 },
-    { field: 'nome', headerName: 'Nome', flex: 1, minWidth: 300 },
+  const columns: ColumnDef<Contraparte>[] = [
+    { accessorKey: 'id', header: 'ID' },
+    { accessorKey: 'nome', header: 'Nome' },
     {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Ações',
-      width: 100,
-      getActions: (params) => [
-        <GridActionsCellItem
-          icon={<EditIcon />}
-          label="Editar"
-          onClick={() => handleOpenDialog(params.row)}
-        />,
-        <GridActionsCellItem
-          icon={<DeleteIcon />}
-          label="Excluir"
-          onClick={() => handleDelete(params.row.id)}
-        />,
-      ],
+      id: 'actions',
+      header: 'Acoes',
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Contrapartes</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Contrapartes</h1>
+        <Button onClick={() => handleOpenDialog()}>
+          <Plus className="h-4 w-4 mr-2" />
           Nova Contraparte
         </Button>
-      </Box>
+      </div>
 
-      <Paper sx={{ height: 600, width: '100%' }}>
-        <DataGrid
-          rows={contrapartes}
-          columns={columns}
-          loading={isLoading}
-          pageSizeOptions={[10, 25, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
-          }}
-          disableRowSelectionOnClick
-        />
-      </Paper>
+      <Card>
+        <CardContent className="p-6">
+          <DataTable columns={columns} data={contrapartes as Contraparte[]} loading={isLoading} />
+        </CardContent>
+      </Card>
 
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingId ? 'Editar Contraparte' : 'Nova Contraparte'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
-              label="Nome"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              required
-              fullWidth
-            />
-          </Box>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingId ? 'Editar Contraparte' : 'Nova Contraparte'}</DialogTitle>
+            <DialogDescription>
+              Preencha os campos abaixo para {editingId ? 'editar a' : 'criar uma nova'} contraparte.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="nome">Nome</Label>
+              <Input
+                id="nome"
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={!formData.nome || createMutation.isPending || updateMutation.isPending}
+            >
+              {editingId ? 'Salvar' : 'Criar'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            disabled={!formData.nome || createMutation.isPending || updateMutation.isPending}
-          >
-            {editingId ? 'Salvar' : 'Criar'}
-          </Button>
-        </DialogActions>
       </Dialog>
-    </Box>
+    </div>
   );
 }

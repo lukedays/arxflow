@@ -1,28 +1,26 @@
 import { useState } from 'react';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Button } from '@/components/ui/button';
 import {
-  Box,
-  Button,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
-  TextField,
-  Paper,
-  Typography,
-  Autocomplete,
-} from '@mui/material';
-import { DataGrid, GridActionsCellItem } from '@mui/x-data-grid';
-import type { GridColDef } from '@mui/x-data-grid';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { DataTable } from '@/components/ui/data-table';
+import { Combobox } from '@/components/ui/combobox';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useGetAtivos,
   useCreateAtivo,
   useUpdateAtivo,
   useDeleteAtivo,
-  useSearchAtivos,
 } from '../../api/generated/ativos/ativos';
 import { useGetEmissores } from '../../api/generated/emissores/emissores';
 import type { CreateAtivoRequest, UpdateAtivoRequest } from '../../api/generated/model';
@@ -33,6 +31,16 @@ interface AtivoFormData {
   emissorId: number | null;
   alphaToolsId: string;
   dataVencimento: string;
+}
+
+interface Ativo {
+  id: number;
+  codAtivo?: string;
+  tipoAtivo?: string;
+  emissorId?: number;
+  emissorNome?: string;
+  alphaToolsId?: string;
+  dataVencimento?: string;
 }
 
 export default function AtivosPage() {
@@ -53,7 +61,7 @@ export default function AtivosPage() {
   const updateMutation = useUpdateAtivo();
   const deleteMutation = useDeleteAtivo();
 
-  const handleOpenDialog = (ativo?: any) => {
+  const handleOpenDialog = (ativo?: Ativo) => {
     if (ativo) {
       setEditingId(ativo.id);
       setFormData({
@@ -96,7 +104,9 @@ export default function AtivosPage() {
           tipoAtivo: formData.tipoAtivo || undefined,
           emissorId: formData.emissorId || undefined,
           alphaToolsId: formData.alphaToolsId || undefined,
-          dataVencimento: formData.dataVencimento ? new Date(formData.dataVencimento).toISOString() : undefined,
+          dataVencimento: formData.dataVencimento
+            ? new Date(formData.dataVencimento).toISOString()
+            : undefined,
         };
         await updateMutation.mutateAsync({ id: editingId, data: request });
       } else {
@@ -105,7 +115,9 @@ export default function AtivosPage() {
           tipoAtivo: formData.tipoAtivo || undefined,
           emissorId: formData.emissorId || undefined,
           alphaToolsId: formData.alphaToolsId || undefined,
-          dataVencimento: formData.dataVencimento ? new Date(formData.dataVencimento).toISOString() : undefined,
+          dataVencimento: formData.dataVencimento
+            ? new Date(formData.dataVencimento).toISOString()
+            : undefined,
         };
         await createMutation.mutateAsync({ data: request });
       }
@@ -127,125 +139,136 @@ export default function AtivosPage() {
     }
   };
 
-  const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 80 },
-    { field: 'codAtivo', headerName: 'Código', flex: 1, minWidth: 150 },
-    { field: 'tipoAtivo', headerName: 'Tipo', width: 120 },
-    { field: 'emissorNome', headerName: 'Emissor', flex: 1, minWidth: 200 },
-    { field: 'alphaToolsId', headerName: 'AlphaTools ID', width: 150 },
+  const columns: ColumnDef<Ativo>[] = [
+    { accessorKey: 'id', header: 'ID' },
+    { accessorKey: 'codAtivo', header: 'Codigo' },
+    { accessorKey: 'tipoAtivo', header: 'Tipo' },
+    { accessorKey: 'emissorNome', header: 'Emissor' },
+    { accessorKey: 'alphaToolsId', header: 'AlphaTools ID' },
     {
-      field: 'dataVencimento',
-      headerName: 'Vencimento',
-      width: 130,
-      valueFormatter: (value) => {
+      accessorKey: 'dataVencimento',
+      header: 'Vencimento',
+      cell: ({ row }) => {
+        const value = row.original.dataVencimento;
         if (!value) return '';
         return new Date(value).toLocaleDateString('pt-BR');
       },
     },
     {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Ações',
-      width: 100,
-      getActions: (params) => [
-        <GridActionsCellItem
-          icon={<EditIcon />}
-          label="Editar"
-          onClick={() => handleOpenDialog(params.row)}
-        />,
-        <GridActionsCellItem
-          icon={<DeleteIcon />}
-          label="Excluir"
-          onClick={() => handleDelete(params.row.id)}
-        />,
-      ],
+      id: 'actions',
+      header: 'Acoes',
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(row.original.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
-  const emissorSelecionado = emissores.find(e => e.id === formData.emissorId);
+  // Opcoes para o combobox de emissores
+  const emissorOptions = (emissores as Array<{ id?: number; nome?: string }>).map((e) => ({
+    value: e.id!,
+    label: e.nome || '',
+  }));
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4">Ativos</Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Ativos</h1>
+        <Button onClick={() => handleOpenDialog()}>
+          <Plus className="h-4 w-4 mr-2" />
           Novo Ativo
         </Button>
-      </Box>
+      </div>
 
-      <Paper sx={{ height: 600, width: '100%' }}>
-        <DataGrid
-          rows={ativos}
-          columns={columns}
-          loading={isLoading}
-          pageSizeOptions={[10, 25, 50, 100]}
-          initialState={{
-            pagination: { paginationModel: { pageSize: 25 } },
-          }}
-          disableRowSelectionOnClick
-        />
-      </Paper>
+      <Card>
+        <CardContent className="p-6">
+          <DataTable columns={columns} data={ativos as Ativo[]} loading={isLoading} />
+        </CardContent>
+      </Card>
 
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingId ? 'Editar Ativo' : 'Novo Ativo'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
-              label="Código do Ativo"
-              value={formData.codAtivo}
-              onChange={(e) => setFormData({ ...formData, codAtivo: e.target.value })}
-              required
-              fullWidth
-            />
-            <TextField
-              label="Tipo de Ativo"
-              value={formData.tipoAtivo}
-              onChange={(e) => setFormData({ ...formData, tipoAtivo: e.target.value })}
-              fullWidth
-            />
-            <Autocomplete
-              options={emissores}
-              getOptionLabel={(option) => option.nome || ''}
-              value={emissorSelecionado || null}
-              onChange={(_, newValue) => {
-                setFormData({ ...formData, emissorId: newValue?.id || null });
-              }}
-              renderInput={(params) => (
-                <TextField {...params} label="Emissor" />
-              )}
-              fullWidth
-            />
-            <TextField
-              label="AlphaTools ID"
-              value={formData.alphaToolsId}
-              onChange={(e) => setFormData({ ...formData, alphaToolsId: e.target.value })}
-              fullWidth
-            />
-            <TextField
-              label="Data de Vencimento"
-              type="date"
-              value={formData.dataVencimento}
-              onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-          </Box>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingId ? 'Editar Ativo' : 'Novo Ativo'}</DialogTitle>
+            <DialogDescription>
+              Preencha os campos abaixo para {editingId ? 'editar o' : 'criar um novo'} ativo.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="codAtivo">Codigo do Ativo</Label>
+              <Input
+                id="codAtivo"
+                value={formData.codAtivo}
+                onChange={(e) => setFormData({ ...formData, codAtivo: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tipoAtivo">Tipo de Ativo</Label>
+              <Input
+                id="tipoAtivo"
+                value={formData.tipoAtivo}
+                onChange={(e) => setFormData({ ...formData, tipoAtivo: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Emissor</Label>
+              <Combobox
+                options={emissorOptions}
+                value={formData.emissorId}
+                onChange={(value) =>
+                  setFormData({ ...formData, emissorId: value as number | null })
+                }
+                placeholder="Selecione um emissor"
+                searchPlaceholder="Buscar emissor..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="alphaToolsId">AlphaTools ID</Label>
+              <Input
+                id="alphaToolsId"
+                value={formData.alphaToolsId}
+                onChange={(e) => setFormData({ ...formData, alphaToolsId: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dataVencimento">Data de Vencimento</Label>
+              <Input
+                id="dataVencimento"
+                type="date"
+                value={formData.dataVencimento}
+                onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={handleCloseDialog}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSave}
+              disabled={
+                !formData.codAtivo || createMutation.isPending || updateMutation.isPending
+              }
+            >
+              {editingId ? 'Salvar' : 'Criar'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancelar</Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            disabled={!formData.codAtivo || createMutation.isPending || updateMutation.isPending}
-          >
-            {editingId ? 'Salvar' : 'Criar'}
-          </Button>
-        </DialogActions>
       </Dialog>
-    </Box>
+    </div>
   );
 }

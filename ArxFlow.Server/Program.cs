@@ -42,7 +42,7 @@ try
     {
         options.AddPolicy("AllowFrontend", policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost:5236", "https://localhost:7236")
+            policy.WithOrigins("http://localhost:5173", "http://localhost:5236")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials();
@@ -98,12 +98,10 @@ try
     app.MapFundosEndpoints();
     app.MapContrapartesEndpoints();
     app.MapAtivosEndpoints();
-
-    // Próximos endpoints a serem implementados:
-    // app.MapBoletasEndpoints();
-    // app.MapCalculadoraEndpoints();
-    // app.MapYieldCurveEndpoints();
-    // app.MapDownloadsEndpoints();
+    app.MapCalculadoraEndpoints();
+    app.MapBoletasEndpoints();
+    app.MapYieldCurveEndpoints();
+    app.MapDownloadsEndpoints();
 
     // Servir frontend React
     app.UseDefaultFiles();

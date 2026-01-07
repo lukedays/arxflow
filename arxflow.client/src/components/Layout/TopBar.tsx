@@ -1,31 +1,23 @@
-import { AppBar, Toolbar, Typography, IconButton, Box } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import MegaMenu from './MegaMenu';
 
-interface TopBarProps {
-  onMenuToggle: () => void;
-}
-
-export default function TopBar({ onMenuToggle }: TopBarProps) {
+export default function TopBar() {
   return (
-    <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar>
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={onMenuToggle}
-          sx={{ mr: 2 }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          ArxFlow
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Typography variant="body2">
-            Sistema de Gestão de Boletas
-          </Typography>
-        </Box>
-      </Toolbar>
-    </AppBar>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-primary text-primary-foreground shadow-md">
+      <div className="flex h-16 items-center px-4">
+        {/* Logo e titulo */}
+        <h1 className="text-xl font-bold mr-8 cursor-default">ArxFlow</h1>
+
+        {/* Mega Menu */}
+        <MegaMenu />
+
+        {/* Espacador para empurrar conteudo para a direita */}
+        <div className="flex-grow" />
+
+        {/* Subtitulo do sistema */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm opacity-80">Sistema de Gestao de Boletas</span>
+        </div>
+      </div>
+    </header>
   );
 }

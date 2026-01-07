@@ -1,153 +1,23 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "ArxFlow API",
-    "version": "v1"
+    "title": "ArxFlow.Server | v1",
+    "version": "1.0.0"
   },
+  "servers": [
+    {
+      "url": "http://localhost:5236/"
+    }
+  ],
   "paths": {
-    "/api/contrapartes": {
+    "/health": {
       "get": {
         "tags": [
-          "Contrapartes"
-        ],
-        "operationId": "GetContrapartes",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Contrapartes"
-        ],
-        "operationId": "CreateContraparte",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateContraparteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/contrapartes/{id}": {
-      "get": {
-        "tags": [
-          "Contrapartes"
-        ],
-        "operationId": "GetContraparteById",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
+          "Health"
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Contrapartes"
-        ],
-        "operationId": "UpdateContraparte",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateContraparteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Contrapartes"
-        ],
-        "operationId": "DeleteContraparte",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -160,14 +30,7 @@
         "operationId": "GetEmissores",
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -188,14 +51,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -219,14 +75,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -258,14 +107,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -287,14 +129,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -307,14 +142,7 @@
         "operationId": "GetFundos",
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -335,14 +163,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -366,14 +187,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -405,14 +219,7 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       },
@@ -434,23 +241,546 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Void"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/health": {
+    "/api/contrapartes": {
       "get": {
         "tags": [
-          "Health"
+          "Contrapartes"
         ],
+        "operationId": "GetContrapartes",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Contrapartes"
+        ],
+        "operationId": "CreateContraparte",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContraparteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/contrapartes/{id}": {
+      "get": {
+        "tags": [
+          "Contrapartes"
+        ],
+        "operationId": "GetContraparteById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Contrapartes"
+        ],
+        "operationId": "UpdateContraparte",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContraparteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Contrapartes"
+        ],
+        "operationId": "DeleteContraparte",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ativos": {
+      "get": {
+        "tags": [
+          "Ativos"
+        ],
+        "operationId": "GetAtivos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Ativos"
+        ],
+        "operationId": "CreateAtivo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAtivoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ativos/search": {
+      "get": {
+        "tags": [
+          "Ativos"
+        ],
+        "operationId": "SearchAtivos",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ativos/{id}": {
+      "get": {
+        "tags": [
+          "Ativos"
+        ],
+        "operationId": "GetAtivoById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Ativos"
+        ],
+        "operationId": "UpdateAtivo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAtivoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Ativos"
+        ],
+        "operationId": "DeleteAtivo",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/calculadora/ltn/pu": {
+      "post": {
+        "tags": [
+          "Calculadora"
+        ],
+        "operationId": "CalculateLTNPU",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateLTNPURequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/calculadora/ltn/taxa": {
+      "post": {
+        "tags": [
+          "Calculadora"
+        ],
+        "operationId": "CalculateLTNTaxa",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateLTNTaxaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/boletas": {
+      "get": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "GetBoletas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "CreateBoleta",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBoletaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/boletas/{id}": {
+      "get": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "GetBoletaById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "UpdateBoleta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBoletaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Boletas"
+        ],
+        "operationId": "DeleteBoleta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/yield-curve/dates": {
+      "get": {
+        "tags": [
+          "YieldCurve"
+        ],
+        "operationId": "GetYieldCurveDates",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/yield-curve": {
+      "get": {
+        "tags": [
+          "YieldCurve"
+        ],
+        "operationId": "GetYieldCurve",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "curveType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "interpolation",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/downloads/b3/precos": {
+      "post": {
+        "tags": [
+          "Downloads"
+        ],
+        "operationId": "DownloadB3Precos",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/downloads/b3/instrumentos": {
+      "post": {
+        "tags": [
+          "Downloads"
+        ],
+        "operationId": "DownloadB3Instrumentos",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/downloads/b3/rendafixa": {
+      "post": {
+        "tags": [
+          "Downloads"
+        ],
+        "operationId": "DownloadB3RendaFixa",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/downloads/bcb/expectativas": {
+      "post": {
+        "tags": [
+          "Downloads"
+        ],
+        "operationId": "DownloadBcbExpectativas",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/downloads/anbima/tpf": {
+      "post": {
+        "tags": [
+          "Downloads"
+        ],
+        "operationId": "DownloadAnbimaTpf",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/downloads/anbima/vna": {
+      "post": {
+        "tags": [
+          "Downloads"
+        ],
+        "operationId": "DownloadAnbimaVna",
         "responses": {
           "200": {
             "description": "OK"
@@ -461,6 +791,179 @@
   },
   "components": {
     "schemas": {
+      "CalculateLTNPURequest": {
+        "required": [
+          "dataCotacao",
+          "dataVencimento",
+          "taxaAno"
+        ],
+        "type": "object",
+        "properties": {
+          "dataCotacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataVencimento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "taxaAno": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "CalculateLTNTaxaRequest": {
+        "required": [
+          "dataCotacao",
+          "dataVencimento",
+          "pu"
+        ],
+        "type": "object",
+        "properties": {
+          "dataCotacao": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataVencimento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pu": {
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "CreateAtivoRequest": {
+        "required": [
+          "codAtivo"
+        ],
+        "type": "object",
+        "properties": {
+          "codAtivo": {
+            "maxLength": 50,
+            "type": "string"
+          },
+          "tipoAtivo": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "emissorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "alphaToolsId": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "dataVencimento": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "CreateBoletaRequest": {
+        "required": [
+          "tipoOperacao",
+          "tipoPrecificacao"
+        ],
+        "type": "object",
+        "properties": {
+          "boletaPrincipalId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ativoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contraparteId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fundoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ticker": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "tipoOperacao": {
+            "maxLength": 1,
+            "type": "string"
+          },
+          "volume": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidade": {
+            "type": "number",
+            "format": "double"
+          },
+          "tipoPrecificacao": {
+            "type": "string"
+          },
+          "ntnbReferencia": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "spreadValor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataFixing": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "taxaNominal": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "pu": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "alocacao": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "usuario": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string"
+          },
+          "dataLiquidacao": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "CreateContraparteRequest": {
         "required": [
           "nome"
@@ -468,11 +971,9 @@
         "type": "object",
         "properties": {
           "nome": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "CreateEmissorRequest": {
         "required": [
@@ -481,8 +982,7 @@
         "type": "object",
         "properties": {
           "nome": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "documento": {
             "type": "string",
@@ -492,8 +992,7 @@
             "type": "string",
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "CreateFundoRequest": {
         "required": [
@@ -502,8 +1001,7 @@
         "type": "object",
         "properties": {
           "nome": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "cnpj": {
             "type": "string",
@@ -513,8 +1011,149 @@
             "type": "string",
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
+      },
+      "DownloadRequest": {
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UpdateAtivoRequest": {
+        "required": [
+          "codAtivo"
+        ],
+        "type": "object",
+        "properties": {
+          "codAtivo": {
+            "maxLength": 50,
+            "type": "string"
+          },
+          "tipoAtivo": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "emissorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "alphaToolsId": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "dataVencimento": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateBoletaRequest": {
+        "required": [
+          "tipoOperacao",
+          "tipoPrecificacao"
+        ],
+        "type": "object",
+        "properties": {
+          "boletaPrincipalId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ativoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "contraparteId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fundoId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ticker": {
+            "maxLength": 50,
+            "type": "string",
+            "nullable": true
+          },
+          "tipoOperacao": {
+            "maxLength": 1,
+            "type": "string"
+          },
+          "volume": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantidade": {
+            "type": "number",
+            "format": "double"
+          },
+          "tipoPrecificacao": {
+            "type": "string"
+          },
+          "ntnbReferencia": {
+            "maxLength": 20,
+            "type": "string",
+            "nullable": true
+          },
+          "spreadValor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "dataFixing": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "taxaNominal": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "pu": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "alocacao": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "usuario": {
+            "maxLength": 100,
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string"
+          },
+          "dataLiquidacao": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          }
+        }
       },
       "UpdateContraparteRequest": {
         "required": [
@@ -523,11 +1162,9 @@
         "type": "object",
         "properties": {
           "nome": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           }
-        },
-        "additionalProperties": false
+        }
       },
       "UpdateEmissorRequest": {
         "required": [
@@ -536,8 +1173,7 @@
         "type": "object",
         "properties": {
           "nome": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "documento": {
             "type": "string",
@@ -547,8 +1183,7 @@
             "type": "string",
             "nullable": true
           }
-        },
-        "additionalProperties": false
+        }
       },
       "UpdateFundoRequest": {
         "required": [
@@ -557,8 +1192,7 @@
         "type": "object",
         "properties": {
           "nome": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "cnpj": {
             "type": "string",
@@ -568,13 +1202,37 @@
             "type": "string",
             "nullable": true
           }
-        },
-        "additionalProperties": false
-      },
-      "Void": {
-        "type": "object",
-        "additionalProperties": false
+        }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Emissores"
+    },
+    {
+      "name": "Fundos"
+    },
+    {
+      "name": "Contrapartes"
+    },
+    {
+      "name": "Ativos"
+    },
+    {
+      "name": "Calculadora"
+    },
+    {
+      "name": "Boletas"
+    },
+    {
+      "name": "YieldCurve"
+    },
+    {
+      "name": "Downloads"
+    }
+  ]
 }
