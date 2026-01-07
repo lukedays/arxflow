@@ -37,15 +37,14 @@ try
     builder.Services.AddScoped<FundoService>();
     builder.Services.AddScoped<ContraparteService>();
 
-    // CORS - permitir frontend Vite
+    // CORS - permitir qualquer origem na rede
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend", policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "http://localhost:5236")
+            policy.AllowAnyOrigin()
                   .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
+                  .AllowAnyMethod();
         });
     });
 
