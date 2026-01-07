@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
-import { useGetYieldCurve, useGetYieldCurveDates } from '@/api/generated/yield-curve/yield-curve';
+import { useGetYieldCurve } from '@/api/generated/yield-curve/yield-curve';
 
 // Tipos para a resposta da API
 interface YieldCurvePoint {
@@ -37,9 +37,6 @@ export default function YieldCurvePage() {
   });
 
   const [showInterpolated, setShowInterpolated] = useState(true);
-
-  // Query para buscar datas disponiveis
-  const { data: availableDates } = useGetYieldCurveDates() as { data: string[] | undefined };
 
   // Query para buscar curva - usa data no formato yyyy-MM-dd para evitar problemas de timezone
   const {

@@ -83,7 +83,7 @@ export default function DownloadsPage() {
             </Alert>
           )}
 
-          {mutation.error && (
+          {mutation.error != null && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>Erro ao processar download</AlertDescription>
