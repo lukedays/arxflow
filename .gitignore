@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /ArxFlow.Server/Data/arxflow.db-shm
 /ArxFlow.Server/Data/arxflow.db-wal
+/Server/Data/arxflow.db-wal
+/Server/Data/arxflow.db-shm
+/Server/Data/arxflow.db

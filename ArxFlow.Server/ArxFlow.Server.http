@@ -1,6 +1,0 @@
-@ArxFlow.Server_HostAddress = http://localhost:5236
-
-GET {{ArxFlow.Server_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
