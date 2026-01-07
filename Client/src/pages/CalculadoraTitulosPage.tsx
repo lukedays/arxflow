@@ -3,10 +3,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
+import { useCalculateLTNPU, useCalculateLTNTaxa } from '@/api/generated/calculadora/calculadora';
 
-interface Resultado {
-  pu?: number;
-  taxaAno?: number;
+// Tipos para as respostas da API
+interface CalculatePUResponse {
+  pu: number;
+  taxaAno: number;
+  diasUteis: number;
+  diasCorridos: number;
+}
+
+interface CalculateTaxaResponse {
+  taxaAno: number;
+  pu: number;
   diasUteis: number;
   diasCorridos: number;
 }
@@ -19,81 +29,62 @@ export default function CalculadoraTitulosPage() {
     pu: '',
   });
 
-  const [resultado, setResultado] = useState<Resultado | null>(null);
-  const [calculando, setCalculando] = useState(false);
+  // Hooks de mutacao Orval
+  const calculatePU = useCalculateLTNPU();
+  const calculateTaxa = useCalculateLTNTaxa();
 
-  const handleCalcularPU = async () => {
-    setCalculando(true);
-    try {
-      const response = await fetch('/api/calculadora/ltn/pu', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dataCotacao: new Date(formData.dataCotacao).toISOString(),
-          dataVencimento: new Date(formData.dataVencimento).toISOString(),
-          taxaAno: parseFloat(formData.taxaAno),
-        }),
-      });
+  const resultado = (calculatePU.data || calculateTaxa.data) as
+    | CalculatePUResponse
+    | CalculateTaxaResponse
+    | undefined;
+  const calculando = calculatePU.isPending || calculateTaxa.isPending;
 
-      const data = await response.json();
-      setResultado(data);
-    } catch (error) {
-      console.error('Erro ao calcular PU:', error);
-    } finally {
-      setCalculando(false);
-    }
+  const handleCalcularPU = () => {
+    calculatePU.mutate({
+      data: {
+        dataCotacao: new Date(formData.dataCotacao).toISOString(),
+        dataVencimento: new Date(formData.dataVencimento).toISOString(),
+        taxaAno: parseFloat(formData.taxaAno),
+      },
+    });
   };
 
-  const handleCalcularTaxa = async () => {
-    setCalculando(true);
-    try {
-      const response = await fetch('/api/calculadora/ltn/taxa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dataCotacao: new Date(formData.dataCotacao).toISOString(),
-          dataVencimento: new Date(formData.dataVencimento).toISOString(),
-          pu: parseFloat(formData.pu),
-        }),
-      });
-
-      const data = await response.json();
-      setResultado(data);
-    } catch (error) {
-      console.error('Erro ao calcular Taxa:', error);
-    } finally {
-      setCalculando(false);
-    }
+  const handleCalcularTaxa = () => {
+    calculateTaxa.mutate({
+      data: {
+        dataCotacao: new Date(formData.dataCotacao).toISOString(),
+        dataVencimento: new Date(formData.dataVencimento).toISOString(),
+        pu: parseFloat(formData.pu),
+      },
+    });
   };
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Calculadora de Títulos - LTN</h1>
+      <h1 className="text-3xl font-bold mb-6">Calculadora de Titulos - LTN</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Dados do Título</CardTitle>
+            <CardTitle>Dados do Titulo</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="dataCotacao">Data de Cotação</Label>
-                <Input
-                  id="dataCotacao"
-                  type="date"
+                <Label>Data de Cotacao</Label>
+                <DatePicker
                   value={formData.dataCotacao}
-                  onChange={(e) => setFormData({ ...formData, dataCotacao: e.target.value })}
+                  onChange={(v) => setFormData({ ...formData, dataCotacao: v })}
+                  placeholder="Data de cotacao"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="dataVencimento">Data de Vencimento</Label>
-                <Input
-                  id="dataVencimento"
-                  type="date"
+                <Label>Data de Vencimento</Label>
+                <DatePicker
                   value={formData.dataVencimento}
-                  onChange={(e) => setFormData({ ...formData, dataVencimento: e.target.value })}
+                  onChange={(v) => setFormData({ ...formData, dataVencimento: v })}
+                  placeholder="Data de vencimento"
                 />
               </div>
 
@@ -103,17 +94,19 @@ export default function CalculadoraTitulosPage() {
                   id="taxaAno"
                   type="number"
                   step="0.01"
+                  placeholder="Ex: 12.50"
                   value={formData.taxaAno}
                   onChange={(e) => setFormData({ ...formData, taxaAno: e.target.value })}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pu">PU (Preço Unitário)</Label>
+                <Label htmlFor="pu">PU (Preco Unitario)</Label>
                 <Input
                   id="pu"
                   type="number"
                   step="0.01"
+                  placeholder="Ex: 850.00"
                   value={formData.pu}
                   onChange={(e) => setFormData({ ...formData, pu: e.target.value })}
                 />
@@ -146,26 +139,43 @@ export default function CalculadoraTitulosPage() {
               <CardTitle>Resultado</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {resultado.pu !== undefined && (
-                  <p>
-                    <span className="font-semibold">PU:</span> {resultado.pu.toFixed(6)}
-                  </p>
+              <div className="space-y-4">
+                {'pu' in resultado && resultado.pu !== undefined && (
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">PU Calculado</p>
+                    <p className="text-2xl font-bold">{resultado.pu.toFixed(6)}</p>
+                  </div>
                 )}
 
-                {resultado.taxaAno !== undefined && (
-                  <p>
-                    <span className="font-semibold">Taxa ao Ano:</span> {resultado.taxaAno.toFixed(4)}%
-                  </p>
+                {'taxaAno' in resultado && resultado.taxaAno !== undefined && (
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Taxa ao Ano</p>
+                    <p className="text-2xl font-bold">{resultado.taxaAno.toFixed(4)}%</p>
+                  </div>
                 )}
 
-                <p>
-                  <span className="font-semibold">Dias Úteis:</span> {resultado.diasUteis}
-                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Dias Uteis</p>
+                    <p className="text-xl font-semibold">{resultado.diasUteis}</p>
+                  </div>
 
-                <p>
-                  <span className="font-semibold">Dias Corridos:</span> {resultado.diasCorridos}
-                </p>
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground">Dias Corridos</p>
+                    <p className="text-xl font-semibold">{resultado.diasCorridos}</p>
+                  </div>
+                </div>
+
+                <div className="text-sm text-muted-foreground pt-2">
+                  <p>
+                    Data Referencia:{' '}
+                    {new Date(formData.dataCotacao).toLocaleDateString('pt-BR')}
+                  </p>
+                  <p>
+                    Data Vencimento:{' '}
+                    {new Date(formData.dataVencimento).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

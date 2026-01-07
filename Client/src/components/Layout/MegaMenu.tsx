@@ -17,6 +17,7 @@ import {
   Building2,
   Landmark,
   Users,
+  CheckSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,7 +53,7 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    label: 'Auxiliares',
+    label: 'Renda Fixa',
     items: [
       {
         label: 'Calculadora de Títulos',
@@ -61,11 +62,27 @@ const menuGroups: MenuGroup[] = [
         description: 'Calcular PU e taxas de títulos',
       },
       {
+        label: 'Validação',
+        path: '/validacao',
+        icon: <CheckSquare className="h-5 w-5" />,
+        description: 'Validar calculadoras com dados ANBIMA',
+      },
+    ],
+  },
+  {
+    label: 'Juros',
+    items: [
+      {
         label: 'Curva de Juros',
         path: '/yield-curve',
         icon: <LineChart className="h-5 w-5" />,
         description: 'Visualizar curvas de juros',
       },
+    ],
+  },
+  {
+    label: 'Auxiliares',
+    items: [
       {
         label: 'Downloads',
         path: '/downloads',

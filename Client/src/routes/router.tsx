@@ -9,6 +9,7 @@ import BoletasPage from '../pages/BoletasPage';
 import CalculadoraTitulosPage from '../pages/CalculadoraTitulosPage';
 import YieldCurvePage from '../pages/YieldCurvePage';
 import DownloadsPage from '../pages/DownloadsPage';
+import ValidacaoCalculadorasPage from '../pages/ValidacaoCalculadorasPage';
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         path: 'downloads',
         element: <DownloadsPage />,
+      },
+      {
+        path: 'validacao',
+        element: <ValidacaoCalculadorasPage />,
       },
       {
         path: 'ativos',

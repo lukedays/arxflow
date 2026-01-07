@@ -101,6 +101,7 @@ try
     app.MapBoletasEndpoints();
     app.MapYieldCurveEndpoints();
     app.MapDownloadsEndpoints();
+    app.MapValidacaoEndpoints();
 
     // Servir frontend React
     app.UseDefaultFiles();

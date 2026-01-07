@@ -12,7 +12,12 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query'
 
-import type { CalculateLTNPURequest, CalculateLTNTaxaRequest } from '.././model'
+import type {
+  CalculateLTNPURequest,
+  CalculateLTNTaxaRequest,
+  CalculatePUResponse,
+  CalculateTaxaResponse,
+} from '.././model'
 
 import { apiClient } from '../../client'
 
@@ -20,7 +25,7 @@ export const calculateLTNPU = (
   calculateLTNPURequest: CalculateLTNPURequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<CalculatePUResponse>({
     url: `/api/calculadora/ltn/pu`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -96,7 +101,7 @@ export const calculateLTNTaxa = (
   calculateLTNTaxaRequest: CalculateLTNTaxaRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<CalculateTaxaResponse>({
     url: `/api/calculadora/ltn/taxa`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

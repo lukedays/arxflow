@@ -6,6 +6,23 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Download, AlertCircle, CheckCircle2 } from 'lucide-react';
+import {
+  useDownloadB3Precos,
+  useDownloadB3Instrumentos,
+  useDownloadB3RendaFixa,
+  useDownloadAnbimaTpf,
+  useDownloadAnbimaVna,
+  useDownloadBcbExpectativas,
+} from '@/api/generated/downloads/downloads';
+import type { DownloadRequest } from '@/api/generated/model';
+
+// Tipo de resposta dos endpoints de download
+interface DownloadResponse {
+  success: boolean;
+  message: string;
+  recordsProcessed: number;
+  errors?: string[] | null;
+}
 
 export default function DownloadsPage() {
   const [dateRange, setDateRange] = useState({
@@ -13,55 +30,30 @@ export default function DownloadsPage() {
     endDate: new Date().toISOString().split('T')[0],
   });
 
-  const [downloadState, setDownloadState] = useState<{
-    [key: string]: { loading: boolean; result: { success?: boolean; message?: string; recordsProcessed?: number } | null };
-  }>({});
+  // Hooks de mutacao Orval
+  const b3Precos = useDownloadB3Precos();
+  const b3Instrumentos = useDownloadB3Instrumentos();
+  const b3RendaFixa = useDownloadB3RendaFixa();
+  const anbimaTpf = useDownloadAnbimaTpf();
+  const anbimaVna = useDownloadAnbimaVna();
+  const bcbExpectativas = useDownloadBcbExpectativas();
 
-  const handleDownload = async (
-    endpoint: string,
-    key: string,
-    requiresDateRange: boolean = false
-  ) => {
-    setDownloadState((prev) => ({ ...prev, [key]: { loading: true, result: null } }));
-
-    try {
-      const url = `/api/downloads/${endpoint}`;
-      const options: RequestInit = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      };
-
-      if (requiresDateRange) {
-        options.body = JSON.stringify({
-          startDate: new Date(dateRange.startDate).toISOString(),
-          endDate: new Date(dateRange.endDate).toISOString(),
-        });
-      }
-
-      const response = await fetch(url, options);
-      const data = await response.json();
-
-      setDownloadState((prev) => ({ ...prev, [key]: { loading: false, result: data } }));
-    } catch (error) {
-      console.error('Erro no download:', error);
-      setDownloadState((prev) => ({
-        ...prev,
-        [key]: {
-          loading: false,
-          result: { success: false, message: 'Erro ao processar download' },
-        },
-      }));
-    }
-  };
+  const getRequest = (): DownloadRequest => ({
+    startDate: dateRange.startDate,
+    endDate: dateRange.endDate,
+  });
 
   const renderDownloadCard = (
     title: string,
     description: string,
-    endpoint: string,
-    key: string,
-    requiresDateRange: boolean = false
+    mutation: {
+      mutate: (params: { data: DownloadRequest }) => void;
+      isPending: boolean;
+      data?: unknown;
+      error?: unknown;
+    }
   ) => {
-    const state = downloadState[key] || { loading: false, result: null };
+    const result = mutation.data as DownloadResponse | undefined;
 
     return (
       <Card>
@@ -71,38 +63,41 @@ export default function DownloadsPage() {
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">{description}</p>
 
-          {state.loading && <Progress value={50} className="mb-4" />}
+          {mutation.isPending && <Progress value={50} className="mb-4" />}
 
-          {state.result && (
-            <Alert
-              variant={state.result.success ? 'default' : 'destructive'}
-              className="mb-4"
-            >
-              {state.result.success ? (
+          {result && (
+            <Alert variant={result.success ? 'default' : 'destructive'} className="mb-4">
+              {result.success ? (
                 <CheckCircle2 className="h-4 w-4" />
               ) : (
                 <AlertCircle className="h-4 w-4" />
               )}
               <AlertDescription>
-                {state.result.message}
-                {state.result.recordsProcessed !== undefined &&
-                  state.result.recordsProcessed > 0 && (
-                    <span className="block text-xs mt-1">
-                      Registros processados: {state.result.recordsProcessed}
-                    </span>
-                  )}
+                {result.message}
+                {result.recordsProcessed > 0 && (
+                  <span className="block text-xs mt-1">
+                    Registros processados: {result.recordsProcessed}
+                  </span>
+                )}
               </AlertDescription>
+            </Alert>
+          )}
+
+          {mutation.error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>Erro ao processar download</AlertDescription>
             </Alert>
           )}
         </CardContent>
         <CardFooter>
           <Button
-            onClick={() => handleDownload(endpoint, key, requiresDateRange)}
-            disabled={state.loading}
+            onClick={() => mutation.mutate({ data: getRequest() })}
+            disabled={mutation.isPending}
             className="w-full"
           >
             <Download className="h-4 w-4 mr-2" />
-            {state.loading ? 'Processando...' : 'Iniciar Download'}
+            {mutation.isPending ? 'Processando...' : 'Iniciar Download'}
           </Button>
         </CardFooter>
       </Card>
@@ -120,7 +115,7 @@ export default function DownloadsPage() {
               <Label>Data Inicial</Label>
               <DatePicker
                 value={dateRange.startDate}
-                onChange={v => setDateRange({ ...dateRange, startDate: v })}
+                onChange={(v) => setDateRange({ ...dateRange, startDate: v })}
                 placeholder="Data inicial"
               />
             </div>
@@ -128,7 +123,7 @@ export default function DownloadsPage() {
               <Label>Data Final</Label>
               <DatePicker
                 value={dateRange.endDate}
-                onChange={v => setDateRange({ ...dateRange, endDate: v })}
+                onChange={(v) => setDateRange({ ...dateRange, endDate: v })}
                 placeholder="Data final"
               />
             </div>
@@ -144,44 +139,32 @@ export default function DownloadsPage() {
         {renderDownloadCard(
           'Precos B3',
           'Download de precos historicos de derivativos da B3',
-          'b3/precos',
-          'b3-precos',
-          true
+          b3Precos
         )}
         {renderDownloadCard(
           'Instrumentos B3',
           'Download de instrumentos de derivativos disponiveis',
-          'b3/instrumentos',
-          'b3-instrumentos',
-          false
+          b3Instrumentos
         )}
         {renderDownloadCard(
           'Renda Fixa B3',
           'Download de dados de renda fixa da B3',
-          'b3/rendafixa',
-          'b3-rendafixa',
-          false
+          b3RendaFixa
         )}
         {renderDownloadCard(
           'Taxas TPF - ANBIMA',
           'Download de taxas indicativas de Titulos Publicos Federais',
-          'anbima/tpf',
-          'anbima-tpf',
-          false
+          anbimaTpf
         )}
         {renderDownloadCard(
           'VNA - ANBIMA',
           'Download de Valores Nominais Atualizados',
-          'anbima/vna',
-          'anbima-vna',
-          false
+          anbimaVna
         )}
         {renderDownloadCard(
           'Expectativas de Mercado',
           'Download de expectativas do Relatorio Focus do BCB',
-          'bcb/expectativas',
-          'bcb-expectativas',
-          false
+          bcbExpectativas
         )}
       </div>
     </div>

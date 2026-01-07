@@ -17,12 +17,12 @@ import type {
   UseQueryResult,
 } from '@tanstack/react-query'
 
-import type { GetYieldCurveParams } from '.././model'
+import type { GetYieldCurveParams, YieldCurveResponse } from '.././model'
 
 import { apiClient } from '../../client'
 
 export const getYieldCurveDates = (signal?: AbortSignal) => {
-  return apiClient<void>({
+  return apiClient<string[]>({
     url: `/api/yield-curve/dates`,
     method: 'GET',
     signal,
@@ -166,7 +166,7 @@ export const getYieldCurve = (
   params?: GetYieldCurveParams,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<YieldCurveResponse>({
     url: `/api/yield-curve`,
     method: 'GET',
     params,

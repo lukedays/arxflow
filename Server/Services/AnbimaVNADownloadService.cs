@@ -110,13 +110,17 @@ public class AnbimaVNADownloadService(HttpClient httpClient)
 
         try
         {
-            // Procura linha que começa com "Titulo;" (header) para pegar apenas a partir dela
+            // Procura linha do header - contem "Titulo" e "VNA" separados por ;
             var linhas = conteudo.Split('\n');
             var headerIndex = -1;
 
             for (int i = 0; i < linhas.Length; i++)
             {
-                if (linhas[i].Contains("Titulo;") || linhas[i].Contains("Título;"))
+                var linha = linhas[i].Trim();
+                // Busca por linha que comeca com Titulo (com ou sem acento) e contem ;VNA;
+                if ((linha.StartsWith("Titulo", StringComparison.OrdinalIgnoreCase) ||
+                     linha.StartsWith("Título", StringComparison.OrdinalIgnoreCase)) &&
+                    linha.Contains(";VNA;", StringComparison.OrdinalIgnoreCase))
                 {
                     headerIndex = i;
                     break;
@@ -125,7 +129,8 @@ public class AnbimaVNADownloadService(HttpClient httpClient)
 
             if (headerIndex == -1)
             {
-                Log.Warning("Header não encontrado no arquivo VNA");
+                Log.Warning("Header nao encontrado no arquivo VNA. Primeiras linhas: {Linhas}",
+                    string.Join(" | ", linhas.Take(10).Select(l => l.Trim())));
                 return vnas;
             }
 

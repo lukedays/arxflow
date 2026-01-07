@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -10,13 +9,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import Chart from 'react-apexcharts';
 import type { ApexOptions } from 'apexcharts';
+import { useGetYieldCurve, useGetYieldCurveDates } from '@/api/generated/yield-curve/yield-curve';
 
+// Tipos para a resposta da API
 interface YieldCurvePoint {
   days: number;
   rate: number;
   maturity: string;
+  ticker?: string;
+  isInterpolated: boolean;
 }
 
 interface YieldCurveData {
@@ -29,34 +33,29 @@ export default function YieldCurvePage() {
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
     curveType: 'DI1',
-    interpolation: 'Linear',
+    interpolation: 'FlatForward',
   });
 
-  const [curveData, setCurveData] = useState<YieldCurveData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [showInterpolated, setShowInterpolated] = useState(true);
 
-  const handleLoadCurve = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({
-        date: new Date(formData.date).toISOString(),
-        curveType: formData.curveType,
-        interpolation: formData.interpolation,
-      });
+  // Query para buscar datas disponiveis
+  const { data: availableDates } = useGetYieldCurveDates() as { data: string[] | undefined };
 
-      const response = await fetch(`/api/yield-curve?${params}`);
-      const data = await response.json();
-      setCurveData(data);
-    } catch (error) {
-      console.error('Erro ao carregar curva:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Query para buscar curva - usa data no formato yyyy-MM-dd para evitar problemas de timezone
+  const {
+    data: curveData,
+    isLoading,
+    refetch,
+  } = useGetYieldCurve({
+    date: formData.date,
+    curveType: formData.curveType,
+    interpolation: formData.interpolation,
+  }) as { data: YieldCurveData | undefined; isLoading: boolean; refetch: () => void };
 
-  useEffect(() => {
-    handleLoadCurve();
-  }, []);
+  // Filtra pontos se necessario
+  const filteredPoints = showInterpolated
+    ? curveData?.points
+    : curveData?.points?.filter((p) => !p.isInterpolated);
 
   const chartOptions: ApexOptions = {
     chart: {
@@ -71,9 +70,9 @@ export default function YieldCurvePage() {
       width: 2,
     },
     xaxis: {
-      categories: curveData?.points.map((p) => p.days.toString()) || [],
+      categories: filteredPoints?.map((p) => p.days.toString()) || [],
       title: {
-        text: 'Dias Úteis',
+        text: 'Dias Uteis',
       },
     },
     yaxis: {
@@ -93,12 +92,15 @@ export default function YieldCurvePage() {
       text: `Curva ${curveData?.curveType || 'DI1'}`,
       align: 'center',
     },
+    markers: {
+      size: 4,
+    },
   };
 
   const series = [
     {
       name: 'Taxa',
-      data: curveData?.points.map((p) => p.rate) || [],
+      data: filteredPoints?.map((p) => p.rate) || [],
     },
   ];
 
@@ -109,14 +111,13 @@ export default function YieldCurvePage() {
       <div className="space-y-6">
         <Card>
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
               <div className="space-y-2">
-                <Label htmlFor="date">Data</Label>
-                <Input
-                  id="date"
-                  type="date"
+                <Label>Data</Label>
+                <DatePicker
                   value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  onChange={(v) => setFormData({ ...formData, date: v })}
+                  placeholder="Data de referencia"
                 />
               </div>
 
@@ -131,14 +132,13 @@ export default function YieldCurvePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="DI1">DI1</SelectItem>
-                    <SelectItem value="PRE">PRE</SelectItem>
-                    <SelectItem value="IPCA">IPCA</SelectItem>
+                    <SelectItem value="DAP">DAP (Cupom IPCA)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Interpolação</Label>
+                <Label>Interpolacao</Label>
                 <Select
                   value={formData.interpolation}
                   onValueChange={(value) => setFormData({ ...formData, interpolation: value })}
@@ -147,14 +147,28 @@ export default function YieldCurvePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="FlatForward">Flat Forward 252</SelectItem>
                     <SelectItem value="Linear">Linear</SelectItem>
-                    <SelectItem value="FlatForward">Flat Forward</SelectItem>
+                    <SelectItem value="None">Sem interpolacao</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <Button onClick={handleLoadCurve} disabled={loading} className="h-10">
-                {loading ? 'Carregando...' : 'Carregar Curva'}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="showInterpolated"
+                  checked={showInterpolated}
+                  onChange={(e) => setShowInterpolated(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="showInterpolated" className="cursor-pointer">
+                  Mostrar interpolados
+                </Label>
+              </div>
+
+              <Button onClick={() => refetch()} disabled={isLoading} className="h-10">
+                {isLoading ? 'Carregando...' : 'Carregar Curva'}
               </Button>
             </div>
           </CardContent>
@@ -162,8 +176,10 @@ export default function YieldCurvePage() {
 
         <Card>
           <CardContent className="p-6">
-            {curveData && <Chart options={chartOptions} series={series} type="line" height={400} />}
-            {!curveData && !loading && (
+            {filteredPoints && filteredPoints.length > 0 && (
+              <Chart options={chartOptions} series={series} type="line" height={400} />
+            )}
+            {(!filteredPoints || filteredPoints.length === 0) && !isLoading && (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">
                   Selecione uma data e clique em "Carregar Curva"
@@ -173,19 +189,47 @@ export default function YieldCurvePage() {
           </CardContent>
         </Card>
 
-        {curveData && (
+        {filteredPoints && filteredPoints.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Pontos da Curva</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {curveData.points.map((point, index) => (
-                  <div key={index} className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">{point.days} dias úteis</p>
-                    <p className="text-lg font-semibold">{point.rate.toFixed(4)}%</p>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left p-2">Ticker</th>
+                      <th className="text-left p-2">Vencimento</th>
+                      <th className="text-right p-2">DU</th>
+                      <th className="text-right p-2">Taxa (%)</th>
+                      <th className="text-center p-2">Tipo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredPoints.map((point, index) => (
+                      <tr key={index} className="border-b hover:bg-muted/50">
+                        <td className="p-2">{point.ticker || '-'}</td>
+                        <td className="p-2">
+                          {new Date(point.maturity).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="text-right p-2">{point.days}</td>
+                        <td className="text-right p-2">{point.rate.toFixed(4)}</td>
+                        <td className="text-center p-2">
+                          <span
+                            className={`px-2 py-1 rounded text-xs ${
+                              point.isInterpolated
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}
+                          >
+                            {point.isInterpolated ? 'Interpolado' : 'Vertice'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>

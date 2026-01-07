@@ -1,5 +1,6 @@
 using ArxFlow.Server.DTOs.Calculadora;
 using ArxFlow.Server.Services;
+using ArxFlow.Server.Utils;
 
 namespace ArxFlow.Server.Endpoints;
 
@@ -13,6 +14,11 @@ public static class CalculadoraEndpoints
         group.MapPost("/ltn/pu", (CalculateLTNPURequest request) =>
         {
             var diasCorridos = (request.DataVencimento - request.DataCotacao).Days;
+            var diasUteis = BrazilianCalendar.BusinessDaysBetween(
+                request.DataCotacao,
+                request.DataVencimento,
+                BrazilianCalendarType.Settlement
+            );
 
             var pu = BondCalculator.LTN_CalcularPU(
                 request.TaxaAno,
@@ -20,17 +26,15 @@ public static class CalculadoraEndpoints
                 request.DataVencimento
             );
 
-            // Calcula dias úteis manualmente (simplificado)
-            var diasUteis = diasCorridos * 252 / 365;
-
-            return Results.Ok(new CalculatePUResponse
+            return new CalculatePUResponse
             {
                 PU = pu,
                 TaxaAno = request.TaxaAno,
                 DiasUteis = diasUteis,
                 DiasCorridos = diasCorridos
-            });
+            };
         })
+        .Produces<CalculatePUResponse>()
         .WithName("CalculateLTNPU")
         .WithOpenApi();
 
@@ -38,6 +42,11 @@ public static class CalculadoraEndpoints
         group.MapPost("/ltn/taxa", (CalculateLTNTaxaRequest request) =>
         {
             var diasCorridos = (request.DataVencimento - request.DataCotacao).Days;
+            var diasUteis = BrazilianCalendar.BusinessDaysBetween(
+                request.DataCotacao,
+                request.DataVencimento,
+                BrazilianCalendarType.Settlement
+            );
 
             var taxa = BondCalculator.LTN_CalcularTaxa(
                 request.PU,
@@ -45,17 +54,15 @@ public static class CalculadoraEndpoints
                 request.DataVencimento
             );
 
-            // Calcula dias úteis manualmente (simplificado)
-            var diasUteis = diasCorridos * 252 / 365;
-
-            return Results.Ok(new CalculateTaxaResponse
+            return new CalculateTaxaResponse
             {
                 TaxaAno = taxa,
                 PU = request.PU,
                 DiasUteis = diasUteis,
                 DiasCorridos = diasCorridos
-            });
+            };
         })
+        .Produces<CalculateTaxaResponse>()
         .WithName("CalculateLTNTaxa")
         .WithOpenApi();
     }

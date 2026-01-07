@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json.Serialization;
 using ArxFlow.Server.Models;
 using CsvHelper;
@@ -14,6 +15,12 @@ namespace ArxFlow.Server.Services;
 /// </summary>
 public class B3InstrumentsService(HttpClient httpClient)
 {
+    // Registra provider de encoding para Windows-1252
+    static B3InstrumentsService()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
+
     private const string ExportUrl = "https://arquivos.b3.com.br/bdi/table/export/csv?lang=pt-BR";
 
     /// <summary>
@@ -24,12 +31,6 @@ public class B3InstrumentsService(HttpClient httpClient)
         DateTime endDate
     )
     {
-        Log.Information(
-            "Baixando instrumentos de {Start:yyyy-MM-dd} a {End:yyyy-MM-dd}",
-            startDate,
-            endDate
-        );
-
         var payload = new ExportRequest
         {
             Name = "InstrumentsDerivatives",
@@ -37,30 +38,18 @@ public class B3InstrumentsService(HttpClient httpClient)
             FinalDate = endDate.ToString("yyyy-MM-dd"),
         };
 
-        Log.Information("Enviando request para {Url} com payload: {Payload}", ExportUrl,
-            System.Text.Json.JsonSerializer.Serialize(payload));
-
         var response = await httpClient.PostAsJsonAsync(ExportUrl, payload);
 
-        Log.Information("Response status: {Status}", response.StatusCode);
-
         if (!response.IsSuccessStatusCode)
-        {
-            var errorContent = await response.Content.ReadAsStringAsync();
-            Log.Warning("Falha ao baixar instrumentos: {Status} - {Error}", response.StatusCode, errorContent);
             return [];
-        }
 
+        // Arquivo vem em UTF-8 com BOM - remove o BOM se existir
         var csv = await response.Content.ReadAsStringAsync();
-        Log.Information("CSV recebido: {Length} caracteres, primeiros 500: {Preview}",
-            csv.Length, csv.Length > 500 ? csv[..500] : csv);
+        if (csv.Length > 0 && csv[0] == '\uFEFF')
+            csv = csv[1..];
 
         var allInstruments = ParseCsv(csv, startDate);
-        Log.Information("Total parseado: {Count} instrumentos", allInstruments.Count);
-
-        List<B3InstrumentoDerivativo> instruments = allInstruments.Where(i => i.Ativo is "DI1" or "DAP").ToList();
-        Log.Information("Filtrado para DI1/DAP: {Count} instrumentos", instruments.Count);
-
+        var instruments = allInstruments.Where(i => i.Ativo is "DI1" or "DAP").ToList();
         return instruments;
     }
 
@@ -105,15 +94,27 @@ public class B3InstrumentsService(HttpClient httpClient)
 
         try
         {
-            foreach (var record in csvReader.GetRecords<B3InstrumentoDerivativo>())
+            while (csvReader.Read())
             {
-                record.DataReferencia = referenceDate;
-                instruments.Add(record);
+                try
+                {
+                    var record = csvReader.GetRecord<B3InstrumentoDerivativo>();
+                    if (record != null)
+                    {
+                        record.DataReferencia = referenceDate;
+                        instruments.Add(record);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Loga erro mas continua processando outras linhas
+                    Log.Debug("Erro ao parsear linha {Row}: {Error}", csvReader.Context.Parser?.Row, ex.Message);
+                }
             }
         }
         catch (Exception ex)
         {
-            Log.Warning("Erro ao parsear CSV: {Error}", ex.Message);
+            Log.Warning("Erro geral ao parsear CSV: {Error}", ex.Message);
         }
 
         return instruments;

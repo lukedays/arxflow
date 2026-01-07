@@ -12,7 +12,7 @@ import type {
   UseMutationResult,
 } from '@tanstack/react-query'
 
-import type { DownloadRequest } from '.././model'
+import type { DownloadRequest, DownloadResponse } from '.././model'
 
 import { apiClient } from '../../client'
 
@@ -20,7 +20,7 @@ export const downloadB3Precos = (
   downloadRequest: DownloadRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<DownloadResponse>({
     url: `/api/downloads/b3/precos`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -96,7 +96,7 @@ export const downloadB3Instrumentos = (
   downloadRequest: DownloadRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<DownloadResponse>({
     url: `/api/downloads/b3/instrumentos`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -172,7 +172,7 @@ export const downloadB3RendaFixa = (
   downloadRequest: DownloadRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<DownloadResponse>({
     url: `/api/downloads/b3/rendafixa`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -248,7 +248,7 @@ export const downloadBcbExpectativas = (
   downloadRequest: DownloadRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<DownloadResponse>({
     url: `/api/downloads/bcb/expectativas`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -327,7 +327,7 @@ export const downloadAnbimaTpf = (
   downloadRequest: DownloadRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<DownloadResponse>({
     url: `/api/downloads/anbima/tpf`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -403,7 +403,7 @@ export const downloadAnbimaVna = (
   downloadRequest: DownloadRequest,
   signal?: AbortSignal
 ) => {
-  return apiClient<void>({
+  return apiClient<DownloadResponse>({
     url: `/api/downloads/anbima/vna`,
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

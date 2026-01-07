@@ -505,7 +505,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculatePUResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -528,7 +535,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalculateTaxaResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -653,7 +667,18 @@
         "operationId": "GetYieldCurveDates",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -690,7 +715,14 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/YieldCurveResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -713,7 +745,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -736,7 +775,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -759,7 +805,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -782,7 +835,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -805,7 +865,14 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -828,7 +895,44 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/validacao/calculadoras": {
+      "post": {
+        "tags": [
+          "Validacao"
+        ],
+        "operationId": "ValidarCalculadoras",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidacaoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidacaoResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -881,6 +985,48 @@
             "minimum": 0,
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "CalculatePUResponse": {
+        "type": "object",
+        "properties": {
+          "pu": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxaAno": {
+            "type": "number",
+            "format": "double"
+          },
+          "diasUteis": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasCorridos": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CalculateTaxaResponse": {
+        "type": "object",
+        "properties": {
+          "taxaAno": {
+            "type": "number",
+            "format": "double"
+          },
+          "pu": {
+            "type": "number",
+            "format": "double"
+          },
+          "diasUteis": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diasCorridos": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1080,6 +1226,120 @@
           }
         }
       },
+      "DownloadResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "recordsProcessed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ResultadoValidacao": {
+        "type": "object",
+        "properties": {
+          "titulo": {
+            "type": "string"
+          },
+          "dataReferencia": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dataVencimento": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "taxaMercado": {
+            "type": "number",
+            "format": "double"
+          },
+          "taxaCalculada": {
+            "type": "number",
+            "format": "double"
+          },
+          "puMercado": {
+            "type": "number",
+            "format": "double"
+          },
+          "puCalculado": {
+            "type": "number",
+            "format": "double"
+          },
+          "diferenciaPU": {
+            "type": "number",
+            "format": "double"
+          },
+          "diferencaTaxa": {
+            "type": "number",
+            "format": "double"
+          },
+          "vna": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ResumoValidacao": {
+        "type": "object",
+        "properties": {
+          "ltnOK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ltnFalhou": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ntnbOK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ntnbFalhou": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ntnfOK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ntnfFalhou": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lftOK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lftFalhou": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ntncOK": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ntncFalhou": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "UpdateAtivoRequest": {
         "required": [
           "codAtivo"
@@ -1253,6 +1513,77 @@
             "nullable": true
           }
         }
+      },
+      "ValidacaoRequest": {
+        "type": "object",
+        "properties": {
+          "diasUteis": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ValidacaoResponse": {
+        "type": "object",
+        "properties": {
+          "resultados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultadoValidacao"
+            }
+          },
+          "resumo": {
+            "$ref": "#/components/schemas/ResumoValidacao"
+          },
+          "erros": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "YieldCurvePoint": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rate": {
+            "type": "number",
+            "format": "double"
+          },
+          "maturity": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ticker": {
+            "type": "string",
+            "nullable": true
+          },
+          "isInterpolated": {
+            "type": "boolean"
+          }
+        }
+      },
+      "YieldCurveResponse": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "curveType": {
+            "type": "string"
+          },
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/YieldCurvePoint"
+            }
+          }
+        }
       }
     }
   },
@@ -1283,6 +1614,9 @@
     },
     {
       "name": "Downloads"
+    },
+    {
+      "name": "Validacao"
     }
   ]
 }

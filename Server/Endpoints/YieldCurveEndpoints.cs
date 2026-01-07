@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ArxFlow.Server.Data;
 using ArxFlow.Server.DTOs.YieldCurve;
+using ArxFlow.Server.Utils;
 
 namespace ArxFlow.Server.Endpoints;
 
@@ -10,52 +11,108 @@ public static class YieldCurveEndpoints
     {
         var group = app.MapGroup("/api/yield-curve").WithTags("YieldCurve");
 
-        // GET /api/yield-curve/dates - Lista datas disponíveis
+        // GET /api/yield-curve/dates - Lista datas disponiveis
         group.MapGet("/dates", async (ApplicationDbContext db) =>
         {
-            // Por enquanto retorna datas de exemplo
-            var dates = new List<DateTime>
-            {
-                DateTime.Today,
-                DateTime.Today.AddDays(-1),
-                DateTime.Today.AddDays(-7),
-                DateTime.Today.AddDays(-30),
-            };
+            var dates = await db.B3PrecosDerivativos
+                .Select(p => p.DataReferencia.Date)
+                .Distinct()
+                .OrderByDescending(d => d)
+                .Take(30)
+                .ToListAsync();
 
-            return Results.Ok(dates);
+            return dates;
         })
+        .Produces<List<DateTime>>()
         .WithName("GetYieldCurveDates")
         .WithOpenApi();
 
-        // GET /api/yield-curve - Obtém curva de juros
-        group.MapGet("/", (DateTime? date, string? curveType, string? interpolation) =>
+        // GET /api/yield-curve - Obtem curva de juros
+        group.MapGet("/", async (DateTime? date, string? curveType, string? interpolation, ApplicationDbContext db) =>
         {
-            var targetDate = date ?? DateTime.Today;
+            // Usa UTC para evitar problemas de timezone - a data vem como ISO UTC do frontend
+            var targetDate = date.HasValue
+                ? DateTime.SpecifyKind(date.Value.Date, DateTimeKind.Unspecified)
+                : DateTime.Today;
             var type = curveType ?? "DI1";
-            var interp = interpolation ?? "Linear";
+            var interp = interpolation ?? "FlatForward";
 
-            // Dados de exemplo - simula curva DI1
-            var points = new List<YieldCurvePoint>
+            // Busca precos e instrumentos do BD para a data especificada
+            var precos = await db.B3PrecosDerivativos
+                .Where(p => p.DataReferencia.Date == targetDate && p.Ticker.StartsWith(type))
+                .ToListAsync();
+
+            // Se nao encontrou na data, busca a data mais recente
+            if (precos.Count == 0)
             {
-                new() { Days = 21, Rate = 10.65m, Maturity = targetDate.AddDays(21) },
-                new() { Days = 42, Rate = 10.70m, Maturity = targetDate.AddDays(42) },
-                new() { Days = 63, Rate = 10.75m, Maturity = targetDate.AddDays(63) },
-                new() { Days = 126, Rate = 10.85m, Maturity = targetDate.AddDays(126) },
-                new() { Days = 252, Rate = 11.00m, Maturity = targetDate.AddDays(252) },
-                new() { Days = 504, Rate = 11.25m, Maturity = targetDate.AddDays(504) },
-                new() { Days = 756, Rate = 11.50m, Maturity = targetDate.AddDays(756) },
-                new() { Days = 1260, Rate = 11.75m, Maturity = targetDate.AddDays(1260) },
-            };
+                var ultimaData = await db.B3PrecosDerivativos
+                    .Where(p => p.Ticker.StartsWith(type))
+                    .OrderByDescending(p => p.DataReferencia)
+                    .Select(p => p.DataReferencia.Date)
+                    .FirstOrDefaultAsync();
 
-            var response = new YieldCurveResponse
+                if (ultimaData != default)
+                {
+                    targetDate = ultimaData;
+                    precos = await db.B3PrecosDerivativos
+                        .Where(p => p.DataReferencia.Date == targetDate && p.Ticker.StartsWith(type))
+                        .ToListAsync();
+                }
+            }
+
+            // Busca instrumentos para obter dias uteis
+            var instrumentos = await db.B3InstrumentosDerivativos
+                .Where(i => i.DataReferencia.Date == targetDate && i.InstrumentoFinanceiro.StartsWith(type))
+                .ToListAsync();
+
+            // Monta pontos da curva
+            var points = new List<YieldCurvePoint>();
+
+            foreach (var preco in precos.OrderBy(p => p.Ticker))
+            {
+                var instrumento = instrumentos.FirstOrDefault(i => i.InstrumentoFinanceiro == preco.Ticker);
+
+                // Pula se nao tem instrumento ou dias uteis
+                if (instrumento == null || instrumento.DiasUteis == null || instrumento.DiasUteis <= 0)
+                    continue;
+
+                // Pula se nao tem taxa
+                if (preco.TaxaAjuste == null)
+                    continue;
+
+                var diasUteis = instrumento.DiasUteis.Value;
+                var dataVencimento = instrumento.DataVencimento ?? targetDate.AddDays(diasUteis);
+
+                points.Add(new YieldCurvePoint
+                {
+                    Days = diasUteis,
+                    Rate = preco.TaxaAjuste.Value,
+                    Maturity = dataVencimento,
+                    Ticker = preco.Ticker
+                });
+            }
+
+            // Ordena por dias uteis
+            points = points.OrderBy(p => p.Days).ToList();
+
+            // Aplica interpolacao se solicitado
+            if (points.Count >= 2 && interp != "None")
+            {
+                var interpType = interp == "Linear"
+                    ? YieldCurveInterpolation.InterpolationType.Linear
+                    : YieldCurveInterpolation.InterpolationType.FlatForward;
+
+                points = YieldCurveInterpolation.GenerateInterpolatedCurve(points, targetDate, interpType);
+            }
+
+            return new YieldCurveResponse
             {
                 Date = targetDate,
                 CurveType = type,
                 Points = points
             };
-
-            return Results.Ok(response);
         })
+        .Produces<YieldCurveResponse>()
         .WithName("GetYieldCurve")
         .WithOpenApi();
     }

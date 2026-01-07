@@ -16,33 +16,25 @@ public static class DownloadsEndpoints
         // POST /api/downloads/b3/precos - Download precos B3
         group.MapPost("/b3/precos", async (DownloadRequest request, B3DownloadService service, ApplicationDbContext db) =>
         {
-            var days = Math.Max(1, (request.EndDate - request.StartDate).Days + 1);
+            var startDate = request.StartDate.Date;
+            var endDate = request.EndDate.Date;
             var allPrecos = new List<B3PrecoDerivativo>();
-            var date = request.EndDate;
+            var date = endDate;
             var processed = 0;
             var errors = new List<string>();
 
-            // Itera por dias uteis, tentando proxima data se falhar
-            for (int attempts = 0; processed < days && attempts < days * 3; attempts++)
+            while (date >= startDate)
             {
-                // Pula fins de semana
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    date = date.AddDays(-1);
-                    continue;
-                }
-
                 try
                 {
                     var precos = await service.FetchAndParseAsync(
                         B3DownloadService.FormatDateCode(date),
                         null,
-                        1 // maxRetries = 1, pois vamos iterar manualmente
+                        1
                     );
 
                     if (precos.Count > 0)
                     {
-                        // Remove existentes da mesma data
                         var dataRef = date.Date;
                         var existentes = await db.B3PrecosDerivativos
                             .Where(p => p.DataReferencia.Date == dataRef)
@@ -61,10 +53,10 @@ public static class DownloadsEndpoints
                     errors.Add($"{date:dd/MM/yyyy}: {ex.Message}");
                 }
 
-                date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Exchange);
+                date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Settlement);
             }
 
-            return Results.Ok(new DownloadResponse
+            return new DownloadResponse
             {
                 Success = allPrecos.Count > 0,
                 Message = allPrecos.Count > 0
@@ -72,35 +64,30 @@ public static class DownloadsEndpoints
                     : "Nenhum preco encontrado",
                 RecordsProcessed = allPrecos.Count,
                 Errors = errors.Count > 0 ? errors : null
-            });
+            };
         })
+        .Produces<DownloadResponse>()
         .WithName("DownloadB3Precos")
         .WithOpenApi();
 
         // POST /api/downloads/b3/instrumentos - Download instrumentos B3
         group.MapPost("/b3/instrumentos", async (DownloadRequest request, B3InstrumentsService service, ApplicationDbContext db) =>
         {
-            var days = Math.Max(1, (request.EndDate - request.StartDate).Days + 1);
+            var startDate = request.StartDate.Date;
+            var endDate = request.EndDate.Date;
             var totalInstrumentos = 0;
-            var date = request.EndDate;
+            var date = endDate;
             var processed = 0;
             var errors = new List<string>();
 
-            for (int attempts = 0; processed < days && attempts < days * 3; attempts++)
+            while (date >= startDate)
             {
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    date = date.AddDays(-1);
-                    continue;
-                }
-
                 try
                 {
                     var instrumentos = await service.FetchInstrumentsAsync(date);
 
                     if (instrumentos.Count > 0)
                     {
-                        // Remove existentes da mesma data
                         var existentes = await db.B3InstrumentosDerivativos
                             .Where(i => i.DataReferencia == date.Date)
                             .ToListAsync();
@@ -118,10 +105,10 @@ public static class DownloadsEndpoints
                     errors.Add($"{date:dd/MM/yyyy}: {ex.Message}");
                 }
 
-                date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Exchange);
+                date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Settlement);
             }
 
-            return Results.Ok(new DownloadResponse
+            return new DownloadResponse
             {
                 Success = totalInstrumentos > 0,
                 Message = totalInstrumentos > 0
@@ -129,35 +116,30 @@ public static class DownloadsEndpoints
                     : "Nenhum instrumento encontrado",
                 RecordsProcessed = totalInstrumentos,
                 Errors = errors.Count > 0 ? errors : null
-            });
+            };
         })
+        .Produces<DownloadResponse>()
         .WithName("DownloadB3Instrumentos")
         .WithOpenApi();
 
         // POST /api/downloads/b3/rendafixa - Download renda fixa B3
         group.MapPost("/b3/rendafixa", async (DownloadRequest request, B3RendaFixaService service, ApplicationDbContext db) =>
         {
-            var days = Math.Max(1, (request.EndDate - request.StartDate).Days + 1);
+            var startDate = request.StartDate.Date;
+            var endDate = request.EndDate.Date;
             var totalInstrumentos = 0;
-            var date = request.EndDate;
+            var date = endDate;
             var processed = 0;
             var errors = new List<string>();
 
-            for (int attempts = 0; processed < days && attempts < days * 3; attempts++)
+            while (date >= startDate)
             {
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    date = date.AddDays(-1);
-                    continue;
-                }
-
                 try
                 {
                     var instrumentos = await service.FetchInstrumentsAsync(date);
 
                     if (instrumentos.Count > 0)
                     {
-                        // Remove existentes da mesma data
                         var existentes = await db.B3InstrumentosRendaFixa
                             .Where(i => i.DataReferencia == date.Date)
                             .ToListAsync();
@@ -175,10 +157,10 @@ public static class DownloadsEndpoints
                     errors.Add($"{date:dd/MM/yyyy}: {ex.Message}");
                 }
 
-                date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Exchange);
+                date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Settlement);
             }
 
-            return Results.Ok(new DownloadResponse
+            return new DownloadResponse
             {
                 Success = totalInstrumentos > 0,
                 Message = totalInstrumentos > 0
@@ -186,8 +168,9 @@ public static class DownloadsEndpoints
                     : "Nenhum instrumento de renda fixa encontrado",
                 RecordsProcessed = totalInstrumentos,
                 Errors = errors.Count > 0 ? errors : null
-            });
+            };
         })
+        .Produces<DownloadResponse>()
         .WithName("DownloadB3RendaFixa")
         .WithOpenApi();
 
@@ -200,7 +183,6 @@ public static class DownloadsEndpoints
 
                 if (expectativas.Count > 0)
                 {
-                    // Remove existentes do periodo
                     var datas = expectativas.Select(e => e.Data.Date).Distinct().ToList();
                     var existentes = await db.BcbExpectativas
                         .Where(e => datas.Contains(e.Data))
@@ -211,52 +193,47 @@ public static class DownloadsEndpoints
                     await db.SaveChangesAsync();
                 }
 
-                return Results.Ok(new DownloadResponse
+                return new DownloadResponse
                 {
                     Success = expectativas.Count > 0,
                     Message = expectativas.Count > 0
                         ? "Download de expectativas BCB concluido"
                         : "Nenhuma expectativa encontrada",
                     RecordsProcessed = expectativas.Count
-                });
+                };
             }
             catch (Exception ex)
             {
-                return Results.Ok(new DownloadResponse
+                return new DownloadResponse
                 {
                     Success = false,
                     Message = "Erro ao processar expectativas BCB",
-                    Errors = new List<string> { ex.Message }
-                });
+                    Errors = [ex.Message]
+                };
             }
         })
+        .Produces<DownloadResponse>()
         .WithName("DownloadBcbExpectativas")
         .WithOpenApi();
 
         // POST /api/downloads/anbima/tpf - Download TPF ANBIMA
         group.MapPost("/anbima/tpf", async (DownloadRequest request, AnbimaDownloadService service, ApplicationDbContext db) =>
         {
-            var days = Math.Max(1, (request.EndDate - request.StartDate).Days + 1);
+            var startDate = request.StartDate.Date;
+            var endDate = request.EndDate.Date;
             var totalTpfs = 0;
-            var date = request.EndDate;
+            var date = endDate;
             var processed = 0;
             var errors = new List<string>();
 
-            for (int attempts = 0; processed < days && attempts < days * 3; attempts++)
+            while (date >= startDate)
             {
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    date = date.AddDays(-1);
-                    continue;
-                }
-
                 try
                 {
                     var tpfs = await service.FetchTPFAsync(date);
 
                     if (tpfs.Count > 0)
                     {
-                        // Remove existentes da mesma data
                         var existentes = await db.AnbimaTPFs
                             .Where(t => t.DataReferencia == date.Date)
                             .ToListAsync();
@@ -277,7 +254,7 @@ public static class DownloadsEndpoints
                 date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Settlement);
             }
 
-            return Results.Ok(new DownloadResponse
+            return new DownloadResponse
             {
                 Success = totalTpfs > 0,
                 Message = totalTpfs > 0
@@ -285,35 +262,30 @@ public static class DownloadsEndpoints
                     : "Nenhum TPF encontrado",
                 RecordsProcessed = totalTpfs,
                 Errors = errors.Count > 0 ? errors : null
-            });
+            };
         })
+        .Produces<DownloadResponse>()
         .WithName("DownloadAnbimaTpf")
         .WithOpenApi();
 
         // POST /api/downloads/anbima/vna - Download VNA ANBIMA
         group.MapPost("/anbima/vna", async (DownloadRequest request, AnbimaVNADownloadService service, ApplicationDbContext db) =>
         {
-            var days = Math.Max(1, (request.EndDate - request.StartDate).Days + 1);
+            var startDate = request.StartDate.Date;
+            var endDate = request.EndDate.Date;
             var totalVnas = 0;
-            var date = request.EndDate;
+            var date = endDate;
             var processed = 0;
             var errors = new List<string>();
 
-            for (int attempts = 0; processed < days && attempts < days * 3; attempts++)
+            while (date >= startDate)
             {
-                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    date = date.AddDays(-1);
-                    continue;
-                }
-
                 try
                 {
                     var vnas = await service.FetchVNAAsync(date);
 
                     if (vnas.Count > 0)
                     {
-                        // Remove existentes da mesma data
                         var existentes = await db.AnbimaVNAs
                             .Where(v => v.DataReferencia == date.Date)
                             .ToListAsync();
@@ -334,7 +306,7 @@ public static class DownloadsEndpoints
                 date = BrazilianCalendar.PreviousBusinessDay(date, BrazilianCalendarType.Settlement);
             }
 
-            return Results.Ok(new DownloadResponse
+            return new DownloadResponse
             {
                 Success = totalVnas > 0,
                 Message = totalVnas > 0
@@ -342,8 +314,9 @@ public static class DownloadsEndpoints
                     : "Nenhum VNA encontrado",
                 RecordsProcessed = totalVnas,
                 Errors = errors.Count > 0 ? errors : null
-            });
+            };
         })
+        .Produces<DownloadResponse>()
         .WithName("DownloadAnbimaVna")
         .WithOpenApi();
     }

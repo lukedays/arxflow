@@ -1,34 +1,18 @@
+using ArxFlow.Server.DTOs.YieldCurve;
+
 namespace ArxFlow.Server.Utils;
-
-/// <summary>
-/// Tipo de interpolacao para curvas de juros
-/// </summary>
-public enum InterpolationType
-{
-    /// <summary>Interpolacao linear (liga os pontos)</summary>
-    Linear,
-
-    /// <summary>Interpolacao Flat Forward 252</summary>
-    FlatForward,
-}
-
-/// <summary>
-/// Ponto da curva de juros
-/// </summary>
-public class YieldCurvePoint
-{
-    public int DiasUteis { get; set; }
-    public decimal Taxa { get; set; }
-    public DateTime Vencimento { get; set; }
-    public string? Ticker { get; set; }
-    public bool IsInterpolated { get; set; }
-}
 
 /// <summary>
 /// Interpolacao de curvas de juros
 /// </summary>
 public static class YieldCurveInterpolation
 {
+    public enum InterpolationType
+    {
+        Linear,
+        FlatForward
+    }
+
     /// <summary>
     /// Interpola a taxa para um determinado DU usando Flat Forward 252
     /// </summary>
@@ -148,7 +132,7 @@ public static class YieldCurveInterpolation
         if (vertices.Count == 1)
             return [vertices[0]];
 
-        var sorted = vertices.OrderBy(v => v.DiasUteis).ToList();
+        var sorted = vertices.OrderBy(v => v.Days).ToList();
         var result = new List<YieldCurvePoint>();
 
         // Adiciona primeiro vertice
@@ -159,7 +143,7 @@ public static class YieldCurveInterpolation
             var anterior = sorted[i];
             var posterior = sorted[i + 1];
 
-            int duDiff = posterior.DiasUteis - anterior.DiasUteis;
+            int duDiff = posterior.Days - anterior.Days;
 
             // Calcula step dinamico para garantir pontos intermediarios
             // Se a diferenca e pequena, usa step de 1 DU
@@ -167,14 +151,14 @@ public static class YieldCurveInterpolation
             int step = Math.Max(1, duDiff / (minPointsPerSegment + 1));
 
             // Gera pontos intermediarios
-            for (int du = anterior.DiasUteis + step; du < posterior.DiasUteis; du += step)
+            for (int du = anterior.Days + step; du < posterior.Days; du += step)
             {
                 var taxa = Interpolate(
                     du,
-                    anterior.DiasUteis,
-                    posterior.DiasUteis,
-                    anterior.Taxa,
-                    posterior.Taxa,
+                    anterior.Days,
+                    posterior.Days,
+                    anterior.Rate,
+                    posterior.Rate,
                     type
                 );
 
@@ -188,9 +172,9 @@ public static class YieldCurveInterpolation
                 result.Add(
                     new YieldCurvePoint
                     {
-                        DiasUteis = du,
-                        Taxa = taxa,
-                        Vencimento = vencimento,
+                        Days = du,
+                        Rate = taxa,
+                        Maturity = vencimento,
                         IsInterpolated = true,
                     }
                 );
@@ -215,32 +199,32 @@ public static class YieldCurveInterpolation
         if (vertices.Count == 0)
             return 0;
 
-        var sorted = vertices.OrderBy(v => v.DiasUteis).ToList();
+        var sorted = vertices.OrderBy(v => v.Days).ToList();
 
         // Antes do primeiro vertice
-        if (du <= sorted[0].DiasUteis)
-            return sorted[0].Taxa;
+        if (du <= sorted[0].Days)
+            return sorted[0].Rate;
 
         // Depois do ultimo vertice
-        if (du >= sorted[^1].DiasUteis)
-            return sorted[^1].Taxa;
+        if (du >= sorted[^1].Days)
+            return sorted[^1].Rate;
 
         // Encontra vertices adjacentes
         for (int i = 0; i < sorted.Count - 1; i++)
         {
-            if (du >= sorted[i].DiasUteis && du <= sorted[i + 1].DiasUteis)
+            if (du >= sorted[i].Days && du <= sorted[i + 1].Days)
             {
                 return Interpolate(
                     du,
-                    sorted[i].DiasUteis,
-                    sorted[i + 1].DiasUteis,
-                    sorted[i].Taxa,
-                    sorted[i + 1].Taxa,
+                    sorted[i].Days,
+                    sorted[i + 1].Days,
+                    sorted[i].Rate,
+                    sorted[i + 1].Rate,
                     type
                 );
             }
         }
 
-        return sorted[^1].Taxa;
+        return sorted[^1].Rate;
     }
 }
