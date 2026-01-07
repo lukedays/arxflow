@@ -45,4 +45,19 @@
     <Exec Command="cd &quot;$(SpaRoot)&quot; &amp;&amp; npm run generate:api" IgnoreExitCode="true" ContinueOnError="true" />
   </Target>
 
+  <!-- Build do frontend React no publish -->
+  <Target Name="PublishSpa" AfterTargets="ComputeFilesToPublish">
+    <Message Text="Building React frontend for production..." Importance="high" />
+    <Exec Command="npm install" WorkingDirectory="$(SpaRoot)" />
+    <Exec Command="npm run build" WorkingDirectory="$(SpaRoot)" />
+
+    <ItemGroup>
+      <DistFiles Include="$(SpaRoot)\dist\**\*" />
+      <ResolvedFileToPublish Include="@(DistFiles)">
+        <RelativePath>wwwroot\%(RecursiveDir)%(FileName)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
 </Project>
