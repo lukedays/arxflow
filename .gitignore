@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/ArxFlow.Server/Data/arxflow.db-shm
+/ArxFlow.Server/Data/arxflow.db-wal
