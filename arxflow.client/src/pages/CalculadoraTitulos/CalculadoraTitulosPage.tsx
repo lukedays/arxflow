@@ -68,17 +68,17 @@ export default function CalculadoraTitulosPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-6">Calculadora de Titulos - LTN</h1>
+      <h1 className="text-3xl font-bold mb-6">Calculadora de Títulos - LTN</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Dados do Titulo</CardTitle>
+            <CardTitle>Dados do Título</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="dataCotacao">Data de Cotacao</Label>
+                <Label htmlFor="dataCotacao">Data de Cotação</Label>
                 <Input
                   id="dataCotacao"
                   type="date"
@@ -109,7 +109,7 @@ export default function CalculadoraTitulosPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pu">PU (Preco Unitario)</Label>
+                <Label htmlFor="pu">PU (Preço Unitário)</Label>
                 <Input
                   id="pu"
                   type="number"
@@ -160,7 +160,7 @@ export default function CalculadoraTitulosPage() {
                 )}
 
                 <p>
-                  <span className="font-semibold">Dias Uteis:</span> {resultado.diasUteis}
+                  <span className="font-semibold">Dias Úteis:</span> {resultado.diasUteis}
                 </p>
 
                 <p>

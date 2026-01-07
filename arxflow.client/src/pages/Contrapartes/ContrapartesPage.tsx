@@ -20,6 +20,7 @@ import {
   useCreateContraparte,
   useUpdateContraparte,
   useDeleteContraparte,
+  getGetContrapartesQueryKey,
 } from '../../api/generated/contrapartes/contrapartes';
 import type { CreateContraparteRequest, UpdateContraparteRequest } from '../../api/generated/model';
 
@@ -77,7 +78,7 @@ export default function ContrapartesPage() {
         };
         await createMutation.mutateAsync({ data: request });
       }
-      queryClient.invalidateQueries({ queryKey: ['getContrapartes'] });
+      queryClient.invalidateQueries({ queryKey: getGetContrapartesQueryKey() });
       handleCloseDialog();
     } catch (error) {
       console.error('Erro ao salvar contraparte:', error);
@@ -88,7 +89,7 @@ export default function ContrapartesPage() {
     if (window.confirm('Deseja realmente excluir esta contraparte?')) {
       try {
         await deleteMutation.mutateAsync({ id });
-        queryClient.invalidateQueries({ queryKey: ['getContrapartes'] });
+        queryClient.invalidateQueries({ queryKey: getGetContrapartesQueryKey() });
       } catch (error) {
         console.error('Erro ao excluir contraparte:', error);
       }
@@ -100,7 +101,7 @@ export default function ContrapartesPage() {
     { accessorKey: 'nome', header: 'Nome' },
     {
       id: 'actions',
-      header: 'Acoes',
+      header: 'Ações',
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>

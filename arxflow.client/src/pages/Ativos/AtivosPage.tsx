@@ -21,6 +21,7 @@ import {
   useCreateAtivo,
   useUpdateAtivo,
   useDeleteAtivo,
+  getGetAtivosQueryKey,
 } from '../../api/generated/ativos/ativos';
 import { useGetEmissores } from '../../api/generated/emissores/emissores';
 import type { CreateAtivoRequest, UpdateAtivoRequest } from '../../api/generated/model';
@@ -121,7 +122,7 @@ export default function AtivosPage() {
         };
         await createMutation.mutateAsync({ data: request });
       }
-      queryClient.invalidateQueries({ queryKey: ['getAtivos'] });
+      queryClient.invalidateQueries({ queryKey: getGetAtivosQueryKey() });
       handleCloseDialog();
     } catch (error) {
       console.error('Erro ao salvar ativo:', error);
@@ -132,7 +133,7 @@ export default function AtivosPage() {
     if (window.confirm('Deseja realmente excluir este ativo?')) {
       try {
         await deleteMutation.mutateAsync({ id });
-        queryClient.invalidateQueries({ queryKey: ['getAtivos'] });
+        queryClient.invalidateQueries({ queryKey: getGetAtivosQueryKey() });
       } catch (error) {
         console.error('Erro ao excluir ativo:', error);
       }
@@ -141,7 +142,7 @@ export default function AtivosPage() {
 
   const columns: ColumnDef<Ativo>[] = [
     { accessorKey: 'id', header: 'ID' },
-    { accessorKey: 'codAtivo', header: 'Codigo' },
+    { accessorKey: 'codAtivo', header: 'Código' },
     { accessorKey: 'tipoAtivo', header: 'Tipo' },
     { accessorKey: 'emissorNome', header: 'Emissor' },
     { accessorKey: 'alphaToolsId', header: 'AlphaTools ID' },
@@ -156,7 +157,7 @@ export default function AtivosPage() {
     },
     {
       id: 'actions',
-      header: 'Acoes',
+      header: 'Ações',
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>
@@ -203,7 +204,7 @@ export default function AtivosPage() {
 
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="codAtivo">Codigo do Ativo</Label>
+              <Label htmlFor="codAtivo">Código do Ativo</Label>
               <Input
                 id="codAtivo"
                 value={formData.codAtivo}

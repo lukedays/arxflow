@@ -73,7 +73,7 @@ export default function YieldCurvePage() {
     xaxis: {
       categories: curveData?.points.map((p) => p.days.toString()) || [],
       title: {
-        text: 'Dias Uteis',
+        text: 'Dias Úteis',
       },
     },
     yaxis: {
@@ -138,7 +138,7 @@ export default function YieldCurvePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Interpolacao</Label>
+                <Label>Interpolação</Label>
                 <Select
                   value={formData.interpolation}
                   onValueChange={(value) => setFormData({ ...formData, interpolation: value })}
@@ -182,7 +182,7 @@ export default function YieldCurvePage() {
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {curveData.points.map((point, index) => (
                   <div key={index} className="p-3 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground">{point.days} dias uteis</p>
+                    <p className="text-sm text-muted-foreground">{point.days} dias úteis</p>
                     <p className="text-lg font-semibold">{point.rate.toFixed(4)}%</p>
                   </div>
                 ))}

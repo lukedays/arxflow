@@ -3,7 +3,7 @@ using System.Xml.Serialization;
 using ArxFlow.Server.Models;
 using ArxFlow.Server.Utils;
 using Serilog;
-using Bvmf052 = ArxFlow.Models.B3.Bvmf052;
+using Bvmf052 = ArxFlow.Server.Models.B3.Bvmf052;
 
 namespace ArxFlow.Server.Services;
 

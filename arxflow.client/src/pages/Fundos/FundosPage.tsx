@@ -20,6 +20,7 @@ import {
   useCreateFundo,
   useUpdateFundo,
   useDeleteFundo,
+  getGetFundosQueryKey,
 } from '../../api/generated/fundos/fundos';
 import type { CreateFundoRequest, UpdateFundoRequest } from '../../api/generated/model';
 
@@ -89,7 +90,7 @@ export default function FundosPage() {
         };
         await createMutation.mutateAsync({ data: request });
       }
-      queryClient.invalidateQueries({ queryKey: ['getFundos'] });
+      queryClient.invalidateQueries({ queryKey: getGetFundosQueryKey() });
       handleCloseDialog();
     } catch (error) {
       console.error('Erro ao salvar fundo:', error);
@@ -100,7 +101,7 @@ export default function FundosPage() {
     if (window.confirm('Deseja realmente excluir este fundo?')) {
       try {
         await deleteMutation.mutateAsync({ id });
-        queryClient.invalidateQueries({ queryKey: ['getFundos'] });
+        queryClient.invalidateQueries({ queryKey: getGetFundosQueryKey() });
       } catch (error) {
         console.error('Erro ao excluir fundo:', error);
       }
@@ -114,7 +115,7 @@ export default function FundosPage() {
     { accessorKey: 'alphaToolsId', header: 'AlphaTools ID' },
     {
       id: 'actions',
-      header: 'Acoes',
+      header: 'Ações',
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>

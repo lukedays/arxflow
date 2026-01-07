@@ -20,6 +20,7 @@ import {
   useCreateEmissor,
   useUpdateEmissor,
   useDeleteEmissor,
+  getGetEmissoresQueryKey,
 } from '../../api/generated/emissores/emissores';
 import type { CreateEmissorRequest, UpdateEmissorRequest } from '../../api/generated/model';
 
@@ -90,7 +91,7 @@ export default function EmissoresPage() {
         };
         await createMutation.mutateAsync({ data: request });
       }
-      queryClient.invalidateQueries({ queryKey: ['getEmissores'] });
+      queryClient.invalidateQueries({ queryKey: getGetEmissoresQueryKey() });
       handleCloseDialog();
     } catch (error) {
       console.error('Erro ao salvar emissor:', error);
@@ -101,7 +102,7 @@ export default function EmissoresPage() {
     if (window.confirm('Deseja realmente excluir este emissor?')) {
       try {
         await deleteMutation.mutateAsync({ id });
-        queryClient.invalidateQueries({ queryKey: ['getEmissores'] });
+        queryClient.invalidateQueries({ queryKey: getGetEmissoresQueryKey() });
       } catch (error) {
         console.error('Erro ao excluir emissor:', error);
       }
@@ -115,7 +116,7 @@ export default function EmissoresPage() {
     { accessorKey: 'alphaToolsId', header: 'AlphaTools ID' },
     {
       id: 'actions',
-      header: 'Acoes',
+      header: 'Ações',
       cell: ({ row }) => (
         <div className="flex gap-2">
           <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(row.original)}>
@@ -145,7 +146,7 @@ export default function EmissoresPage() {
         </CardContent>
       </Card>
 
-      {/* Dialog de Criacao/Edicao */}
+      {/* Dialog de Criação/Edição */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Download, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function DownloadsPage() {
   const [dateRange, setDateRange] = useState({
-    startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    startDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
   });
 
@@ -118,21 +117,19 @@ export default function DownloadsPage() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Data Inicial</Label>
-              <Input
-                id="startDate"
-                type="date"
+              <Label>Data Inicial</Label>
+              <DatePicker
                 value={dateRange.startDate}
-                onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+                onChange={v => setDateRange({ ...dateRange, startDate: v })}
+                placeholder="Data inicial"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate">Data Final</Label>
-              <Input
-                id="endDate"
-                type="date"
+              <Label>Data Final</Label>
+              <DatePicker
                 value={dateRange.endDate}
-                onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+                onChange={v => setDateRange({ ...dateRange, endDate: v })}
+                placeholder="Data final"
               />
             </div>
             <Alert>
@@ -143,70 +140,50 @@ export default function DownloadsPage() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="b3" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="b3">B3</TabsTrigger>
-          <TabsTrigger value="anbima">ANBIMA</TabsTrigger>
-          <TabsTrigger value="bcb">BCB</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="b3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {renderDownloadCard(
-              'Precos B3',
-              'Download de precos historicos de derivativos da B3',
-              'b3/precos',
-              'b3-precos',
-              true
-            )}
-            {renderDownloadCard(
-              'Instrumentos B3',
-              'Download de instrumentos de derivativos disponiveis',
-              'b3/instrumentos',
-              'b3-instrumentos',
-              false
-            )}
-            {renderDownloadCard(
-              'Renda Fixa B3',
-              'Download de dados de renda fixa da B3',
-              'b3/rendafixa',
-              'b3-rendafixa',
-              false
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="anbima">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {renderDownloadCard(
-              'Taxas TPF - ANBIMA',
-              'Download de taxas indicativas de Titulos Publicos Federais',
-              'anbima/tpf',
-              'anbima-tpf',
-              false
-            )}
-            {renderDownloadCard(
-              'VNA - ANBIMA',
-              'Download de Valores Nominais Atualizados',
-              'anbima/vna',
-              'anbima-vna',
-              false
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="bcb">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {renderDownloadCard(
-              'Expectativas de Mercado',
-              'Download de expectativas do Relatorio Focus do BCB',
-              'bcb/expectativas',
-              'bcb-expectativas',
-              false
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {renderDownloadCard(
+          'Precos B3',
+          'Download de precos historicos de derivativos da B3',
+          'b3/precos',
+          'b3-precos',
+          true
+        )}
+        {renderDownloadCard(
+          'Instrumentos B3',
+          'Download de instrumentos de derivativos disponiveis',
+          'b3/instrumentos',
+          'b3-instrumentos',
+          false
+        )}
+        {renderDownloadCard(
+          'Renda Fixa B3',
+          'Download de dados de renda fixa da B3',
+          'b3/rendafixa',
+          'b3-rendafixa',
+          false
+        )}
+        {renderDownloadCard(
+          'Taxas TPF - ANBIMA',
+          'Download de taxas indicativas de Titulos Publicos Federais',
+          'anbima/tpf',
+          'anbima-tpf',
+          false
+        )}
+        {renderDownloadCard(
+          'VNA - ANBIMA',
+          'Download de Valores Nominais Atualizados',
+          'anbima/vna',
+          'anbima-vna',
+          false
+        )}
+        {renderDownloadCard(
+          'Expectativas de Mercado',
+          'Download de expectativas do Relatorio Focus do BCB',
+          'bcb/expectativas',
+          'bcb-expectativas',
+          false
+        )}
+      </div>
     </div>
   );
 }
